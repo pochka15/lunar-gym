@@ -42,5 +42,5 @@ class VelocityController:
             return 0
 
         magic_bound = 0.2
-        vx, vy = self.cur_state_.velocity
+        vy = self.cur_state_.velocity
         return 1 if abs(vy) > magic_bound else 0
