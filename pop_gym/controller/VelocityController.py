@@ -1,16 +1,28 @@
-from math import cos, sin
-
 import numpy as np
+from math import cos, sin
+from dataclasses import dataclass
 from typing import Optional
-
 from controller.Controller import Controller
 from others.State import State, LEFT_ACTION, RIGHT_ACTION, UP_ACTION, IDLE_ACTION
 
 
+@dataclass
+class VelocityControllerConfig:
+    max_y_velocity: float
+    max_priority: float
+
+
 class VelocityController(Controller):
-    def __init__(self):
+    """
+    It tries to slow down the lunar in case it has too high y velocity.
+    This controller finds an opposite vector to the current velocity vector
+    and acts towards this opposite vector.
+    """
+
+    def __init__(self, config: VelocityControllerConfig):
         self.prev_state_: Optional[State] = None
         self.cur_state_: Optional[State] = None
+        self.config = config
 
     def handle_state(self, state: State):
         self.prev_state_ = self.cur_state_
@@ -42,6 +54,5 @@ class VelocityController(Controller):
         if self.cur_state_ is None or self.prev_state_ is None:
             return 0
 
-        magic_bound = 0.2
         vy = self.cur_state_.velocity[1]
-        return 1 if abs(vy) > magic_bound else 0
+        return self.config.max_priority if abs(vy) > self.config.max_y_velocity else 0
