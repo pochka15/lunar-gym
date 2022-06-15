@@ -42,11 +42,10 @@ class FrequencyController(Controller):
         return self.counter == self.config.frequency
 
     def handle_state(self, state: State):
+        self.child.handle_state(state)
         self.counter += 1
         if self.counter > self.config.frequency:
             self.counter = 1
-        if self.can_act:
-            self.child.handle_state(state)
 
     def __init__(self, child: Controller, config: FrequencyControllerConfig):
         self.counter = 0
