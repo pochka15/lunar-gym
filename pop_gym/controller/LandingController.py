@@ -6,7 +6,6 @@ from others.State import UP_ACTION, State
 
 @dataclass
 class LandingControllerConfig:
-    min_y_pos: float
     max_priority: float
     max_y_velocity: float
 
@@ -35,7 +34,10 @@ class LandingController(Controller):
 
         y = self.cur_state_.position[1]
         y_velocity = self.cur_state_.velocity[1]
-        if y < self.config.min_y_pos and abs(y_velocity) > self.config.max_y_velocity:
+
+        # hardcoded
+        y_bound = 0.2
+        if y < y_bound and abs(y_velocity) > self.config.max_y_velocity:
             return self.config.max_priority
         else:
             return 0
