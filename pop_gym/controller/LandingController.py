@@ -9,6 +9,12 @@ class LandingControllerConfig:
     max_priority: float
     max_y_velocity: float
 
+    def __str__(self):
+        return f"""
+LandingControllerConfig
+  - max_priority: {self.max_priority}
+  - max_y_velocity: {self.max_y_velocity}"""
+
 
 class LandingController(Controller):
     """

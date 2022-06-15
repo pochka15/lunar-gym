@@ -7,6 +7,11 @@ from others.State import State, IDLE_ACTION
 class FrequencyControllerConfig:
     frequency: float = 1
 
+    def __str__(self):
+        return f"""
+FrequencyControllerConfig
+  - frequency: {self.frequency}"""
+
 
 class FrequencyController(Controller):
     """

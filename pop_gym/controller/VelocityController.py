@@ -11,6 +11,12 @@ class VelocityControllerConfig:
     max_y_velocity: float
     max_priority: float
 
+    def __str__(self):
+        return f"""
+VelocityControllerConfig
+  - max_y_velocity: {self.max_y_velocity}
+  - max_priority: {self.max_priority}"""
+
 
 class VelocityController(Controller):
     """

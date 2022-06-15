@@ -10,6 +10,12 @@ class PositionControllerConfig:
     max_x_distance: float
     max_priority: float
 
+    def __str__(self):
+        return f"""
+PositionControllerConfig
+  - max_x_distance: {self.max_x_distance}
+  - max_priority: {self.max_priority}"""
+
 
 class PositionController(Controller):
     def __init__(self, config: PositionControllerConfig):
