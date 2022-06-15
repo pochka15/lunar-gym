@@ -3,10 +3,11 @@ from math import cos, sin
 import numpy as np
 from typing import Optional
 
-from State import State, LEFT_ACTION, RIGHT_ACTION, UP_ACTION, IDLE_ACTION
+from controller.Controller import Controller
+from others.State import State, LEFT_ACTION, RIGHT_ACTION, UP_ACTION, IDLE_ACTION
 
 
-class VelocityController:
+class VelocityController(Controller):
     def __init__(self):
         self.prev_state_: Optional[State] = None
         self.cur_state_: Optional[State] = None
@@ -42,5 +43,5 @@ class VelocityController:
             return 0
 
         magic_bound = 0.2
-        vy = self.cur_state_.velocity
+        vy = self.cur_state_.velocity[1]
         return 1 if abs(vy) > magic_bound else 0

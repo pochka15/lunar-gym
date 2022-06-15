@@ -1,9 +1,10 @@
 from typing import Optional
 
-from State import State, UP_ACTION
+from controller.Controller import Controller
+from others.State import UP_ACTION, State
 
 
-class PositionController:
+class PositionController(Controller):
     def __init__(self):
         self.cur_state_: Optional[State] = None
         self.counter = 0
@@ -28,4 +29,3 @@ class PositionController:
 
             return 1 if y < magic_bound else 0
         return 0
-

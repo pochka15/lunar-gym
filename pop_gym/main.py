@@ -1,15 +1,15 @@
 import gym
 
-from Balancer import Balancer
-from State import to_state
-from VelocityController import VelocityController
-from src.PositionController import PositionController
+from balancer.DefaultBalancer import DefaultBalancer
+from controller.PositionController import PositionController
+from controller.VelocityController import VelocityController
+from others.State import to_state
 
 if __name__ == '__main__':
-    episodes_amount = 10
+    episodes_amount = 1
     steps_amount = 1000
-    env = gym.make('LunarLander')
-    balancer = Balancer([VelocityController(), PositionController()])
+    env = gym.make('LunarLander-v2')
+    balancer = DefaultBalancer([VelocityController(), PositionController()])
 
     for i_episode in range(episodes_amount):
         # noinspection PyRedeclaration
@@ -18,8 +18,7 @@ if __name__ == '__main__':
             env.render()
 
             state = to_state(observation)
-            balancer.handle_state(state)
-            observation, reward, done, info = env.step(balancer.action)
+            observation, reward, done, info = env.step(balancer.make_action(state))
 
             if done:
                 print("Episode finished after {} steps, reward {}".format(t + 1, reward))
