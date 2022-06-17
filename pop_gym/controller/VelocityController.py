@@ -25,29 +25,27 @@ class VelocityController(Controller):
     and acts towards this opposite vector.
     """
 
-    def __init__(self, config: VelocityControllerConfig):
-        self.prev_state_: Optional[State] = None
-        self.cur_state_: Optional[State] = None
+    def __init__(self, config: VelocityControllerConfig, log):
+        self.log = log
         self.config = config
 
     def handle_state(self, state: State):
-        self.prev_state_ = self.cur_state_
-        self.cur_state_ = state
+        pass
 
     @property
     def action(self):
         """See the https://keisan.casio.com/exec/system/1223522781"""
 
-        if self.cur_state_ is None or self.prev_state_ is None:
+        if self.log[-1] is None or self.log[-2] is None:
             return IDLE_ACTION
 
         # inverted velocity vector
-        vec = -self.cur_state_.velocity
+        vec = -self.log[-1].velocity
 
-        multipliers = [cos(self.cur_state_.angle), sin(self.cur_state_.angle)]
+        multipliers = [cos(self.log[-1].angle), sin(self.log[-1].angle)]
         x = np.sum(vec * multipliers)
 
-        multipliers = [-sin(self.cur_state_.angle), cos(self.cur_state_.angle)]
+        multipliers = [-sin(self.log[-1].angle), cos(self.log[-1].angle)]
         y = np.sum(vec * multipliers)
 
         if x >= 0:
@@ -57,8 +55,24 @@ class VelocityController(Controller):
 
     @property
     def priority(self):
-        if self.cur_state_ is None or self.prev_state_ is None:
+        if len(self.log) < 2:
             return 0
 
-        vy = self.cur_state_.velocity[1]
-        return self.config.max_priority if abs(vy) > self.config.max_y_velocity else 0
+        if self.has_high_acceleration:
+            return self.config.max_priority
+
+        vy = self.log[-1].velocity[1]
+        return self.config.max_priority / 2 if abs(vy) > self.config.max_y_velocity else 0
+
+    @property
+    def has_high_acceleration(self):
+        distance = 2
+        if len(self.log) < distance:
+            return False
+
+        lhs = abs(self.log[-1].position)
+        rhs = abs(self.log[-distance].position)
+        diff = (abs(lhs - rhs) * [1000, 1000])
+        if diff[0] > 9 or diff[1] > 9:
+            return True
+        return False
