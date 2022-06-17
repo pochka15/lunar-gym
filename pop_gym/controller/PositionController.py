@@ -41,15 +41,9 @@ class PositionController(Controller):
         distance = abs(self.state.position[0])
         # Hardcoded
         min_position = -0.05
-        if not self.is_velocity_towards_center and (
-                distance > self.config.max_x_distance or
-                self.state.position[1] < min_position):
+        if distance > self.config.max_x_distance or self.state.position[1] < min_position:
             return self.config.max_priority
         return 0
-
-    @property
-    def is_velocity_towards_center(self):
-        return are_opposite_signs(self.state.position[0], self.state.velocity[0])
 
     def handle_state(self, state: State):
         self.state = state

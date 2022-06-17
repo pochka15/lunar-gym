@@ -36,30 +36,31 @@ def simulate(balancer, log, episodes_amount=1):
 
 
 def test_simulation():
-    land_conf = LandConf(max_y_velocity=0.2, max_priority=1)
-    vel_conf = VelConf(max_y_velocity=0.4, max_priority=2)
+    vel_conf = VelConf(max_y_velocity=0.4, normal_height=0.3, low_height=0.15, safe_angle=10, high_acceleration=11,
+                       max_priority=2)
     pos_conf = PosConf(max_x_distance=0.3, max_priority=1)
-    freq_conf = FreqConfig(frequency=3)
+    freq_conf = FreqConfig(frequency=4)
     log = []
     balancer = DefaultBalancer([
-        LandingController(land_conf),
-        VelocityController(vel_conf, log),
         FrequencyController(PositionController(pos_conf), freq_conf),
+        VelocityController(vel_conf, log),
     ], is_debug=False)
     results = simulate(balancer, log, 30)
-    with open('results/1.csv', 'w', newline='') as csvfile:
+    with open('results/6_remove_velocity_towards_center_small_acceleration.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Done', 'Reward', 'Steps'])
         for result in results:
             writer.writerow(result)
 
-    with open('configs/1.csv', 'w', newline='') as csvfile:
+    with open('configs/6_remove_velocity_towards_center_small_acceleration.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['land_conf.max_priority', 'land_conf.max_y_velocity',
-                         'vel_conf.max_y_velocity', 'vel_conf.max_priority',
+        writer.writerow(['vel_conf.max_y_velocity', 'vel_conf.normal_height',
+                         'vel_conf.low_height', 'vel_conf.safe_angle', 'vel_conf.max_priority',
+                         'vel_conf.high_acceleration',
                          'pos_conf.max_x_distance', 'pos_conf.max_priority',
                          'freq_conf.frequency'])
-        writer.writerow([land_conf.max_priority, land_conf.max_y_velocity,
-                         vel_conf.max_y_velocity, vel_conf.max_priority,
+        writer.writerow([vel_conf.max_y_velocity, vel_conf.normal_height,
+                         vel_conf.low_height, vel_conf.safe_angle, vel_conf.max_priority,
+                         vel_conf.high_acceleration,
                          pos_conf.max_x_distance, pos_conf.max_priority,
                          freq_conf.frequency])
