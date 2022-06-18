@@ -13,7 +13,7 @@ class SamePositionController(Controller):
         self.required_cached_states_amount = 40
         self.is_lifting = False
         self.lift_counter = 0
-        self.lifts_amount = 10
+        self.lifts_amount = 8
 
     @property
     def action(self):

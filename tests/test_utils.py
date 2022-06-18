@@ -8,27 +8,38 @@ from controller.VelocityController import VelocityControllerConfig
 import matplotlib.pyplot as plt
 
 RESULTS_DIR_NAME = 'results'
+CONFIGS_DIR_NAME = 'configs'
 
 
-def get_result_files():
-    return [f for f in listdir(RESULTS_DIR_NAME) if isfile(join(RESULTS_DIR_NAME, f))]
+def get_result_files(prefix=None):
+    return [f for f in listdir(RESULTS_DIR_NAME)
+            if (isfile(join(RESULTS_DIR_NAME, f)) and
+                (prefix is None or
+                 (prefix is not None and f.startswith(prefix))))]
 
 
-def get_reward(file_name):
-    with open(f'{RESULTS_DIR_NAME}/{file_name}', newline='') as csvfile:
+def count_wins(file_name):
+    with open(f'{RESULTS_DIR_NAME}/{file_name}') as csvfile:
         reader = csv.reader(csvfile)
         result = 0
+
+        # Read header
+        _ = next(reader)
+
         for row in reader:
             reward = row[1]
-            if reward == '100':
+            if float(reward) >= 200:
                 result += 1
         return result
 
 
 def get_configs(file_name):
-    with open(f'configs/{file_name}', newline='') as csvfile:
+    with open(f'{CONFIGS_DIR_NAME}/{file_name}') as csvfile:
         reader = csv.reader(csvfile)
-        _ = next(reader)  # Header
+
+        # Read header
+        _ = next(reader)
+
         row = list(float(x) for x in next(reader))
         [  # velocity
             max_y_velocity, normal_height,
@@ -50,11 +61,11 @@ def get_configs(file_name):
         return vel_conf, pos_conf, FrequencyControllerConfig(frequency=frequency)
 
 
-def group_files_by_reward(files):
+def group_files_by_wins(files):
     out = {}
     for f in files:
-        reward = get_reward(f)
-        out.setdefault(reward, []).append(f)
+        amount = count_wins(f)
+        out.setdefault(amount, []).append(f)
     return out
 
 
@@ -90,7 +101,7 @@ def format_configs(velocity_config: VelocityControllerConfig,
 def store_results(results, prefix):
     with open('results/' + prefix + '.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Done', 'Reward', 'Steps'])
+        writer.writerow(['Done', 'Wins', 'Steps'])
         for result in results:
             writer.writerow(result)
 

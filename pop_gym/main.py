@@ -1,5 +1,3 @@
-from time import sleep
-
 import gym
 
 from balancer.DefaultBalancer import DefaultBalancer
@@ -13,8 +11,9 @@ if __name__ == '__main__':
     episodes_amount = 3
     steps_amount = 500
     env = gym.make('LunarLander-v2')
-    vel_conf = VelConf(max_y_velocity=0.4, normal_height=0.4, low_height=0.15, safe_angle=10, high_acceleration=9,
-                       max_priority=2)
+    vel_conf = VelConf(max_y_velocity=0.4, normal_height=0.4,
+                       low_height=0.1, safe_angle=10,
+                       high_acceleration=10, max_priority=2)
     pos_conf = PosConf(max_x_distance=0.4, max_priority=1)
     freq_conf = FreqConfig(frequency=4)
     log = []
@@ -28,15 +27,15 @@ if __name__ == '__main__':
         # noinspection PyRedeclaration
         observation = env.reset()
         log.clear()
+        total_reward = 0
         for t in range(steps_amount):
             env.render()
-
             state = to_state(observation)
-
             log.append(state)
             observation, reward, done, info = env.step(balancer.make_action(state))
+            total_reward += reward
 
             if done:
-                print("Episode finished after {} steps, reward {}".format(t + 1, reward))
+                print("Episode finished after {} steps, reward {}".format(t + 1, total_reward))
                 break
     env.close()
