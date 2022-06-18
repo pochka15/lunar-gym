@@ -3,3 +3,4 @@ Box2d~=2.3.10
 pygame~=2.1.2
 numpy~=1.22.3
 pytest~=7.1.2
+matplotlib~=3.5.2

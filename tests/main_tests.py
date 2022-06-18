@@ -1,5 +1,4 @@
 import gym
-import csv
 
 from balancer.DefaultBalancer import DefaultBalancer
 from controller.FrequencyController import FrequencyController, FrequencyControllerConfig as FreqConfig
@@ -7,6 +6,8 @@ from controller.PositionController import PositionController, PositionController
 from controller.SamePositionController import SamePositionController
 from controller.VelocityController import VelocityController, VelocityControllerConfig as VelConf
 from others.State import to_state
+from test_utils import get_reward, get_configs, get_result_files, stem_plot, group_files_by_reward, \
+    get_values_frequency, store_results, store_configs
 
 
 def simulate(balancer, log, episodes_amount=1):
@@ -35,10 +36,28 @@ def simulate(balancer, log, episodes_amount=1):
     return result
 
 
-def test_simulation():
+def test_plot_velocities():
+    reward_to_files = group_files_by_reward(get_result_files())
+    reward = 18
+    files = reward_to_files[reward]
+    values = list(get_configs(file)[0].max_y_velocity for file in files)
+    statistics = get_values_frequency(values)
+    stem_plot(list(statistics.keys()), list(statistics.values()))
+
+
+def test_plot_max_x_distance():
+    reward_to_files = group_files_by_reward(get_result_files())
+    reward = 16
+    files = reward_to_files[reward]
+    values = list(get_configs(file)[1].max_x_distance for file in files)
+    statistics = get_values_frequency(values)
+    stem_plot(list(statistics.keys()), list(statistics.values()))
+
+
+def test_very_long():
     vel_conf = VelConf(max_y_velocity=0.4, normal_height=0.4, low_height=0.15, safe_angle=10, high_acceleration=9,
                        max_priority=2)
-    pos_conf = PosConf(max_x_distance=0.4, max_priority=1)
+    pos_conf = PosConf(max_x_distance=0.35, max_priority=1)
     freq_conf = FreqConfig(frequency=4)
     log = []
     balancer = DefaultBalancer([
@@ -68,27 +87,27 @@ def test_simulation():
 
                     for freq in frequencies:
                         freq_conf.frequency = freq
-                        simulate_and_store_results(f'{str(vel_conf.max_y_velocity)}_{str(i)}', balancer, freq_conf, log,
-                                                   pos_conf, vel_conf)
+                        prefix = f'{str(vel_conf.max_y_velocity)}_{str(i)}'
+                        results = simulate(balancer, log, 30)
+                        store_results(results, prefix)
+                        store_configs(freq_conf, pos_conf, vel_conf, prefix)
                         i += 1
 
 
-def simulate_and_store_results(prefix, balancer, freq_conf, log, pos_conf, vel_conf):
+def test_quick():
+    vel_conf = VelConf(max_y_velocity=0.45, normal_height=0.4, low_height=0.1, safe_angle=10, high_acceleration=7,
+                       max_priority=2)
+    pos_conf = PosConf(max_x_distance=0.35, max_priority=1)
+    freq_conf = FreqConfig(frequency=4)
+    log = []
+    balancer = DefaultBalancer([
+        SamePositionController(log),
+        FrequencyController(PositionController(pos_conf), freq_conf),
+        VelocityController(vel_conf, log),
+    ], is_debug=False)
+
+    prefix = 'tmp'
     results = simulate(balancer, log, 30)
-    with open('results/' + prefix + '.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Done', 'Reward', 'Steps'])
-        for result in results:
-            writer.writerow(result)
-    with open('configs/' + prefix + '.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['vel_conf.max_y_velocity', 'vel_conf.normal_height',
-                         'vel_conf.low_height', 'vel_conf.safe_angle', 'vel_conf.max_priority',
-                         'vel_conf.high_acceleration',
-                         'pos_conf.max_x_distance', 'pos_conf.max_priority',
-                         'freq_conf.frequency'])
-        writer.writerow([vel_conf.max_y_velocity, vel_conf.normal_height,
-                         vel_conf.low_height, vel_conf.safe_angle, vel_conf.max_priority,
-                         vel_conf.high_acceleration,
-                         pos_conf.max_x_distance, pos_conf.max_priority,
-                         freq_conf.frequency])
+    store_results(results, prefix)
+    store_configs(freq_conf, pos_conf, vel_conf, prefix)
+    print(get_reward('tmp.csv'))
