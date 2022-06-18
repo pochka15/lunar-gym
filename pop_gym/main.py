@@ -1,3 +1,5 @@
+import time
+
 import gym
 
 from balancer.DefaultBalancer import DefaultBalancer
@@ -8,7 +10,7 @@ from controller.VelocityController import VelocityController, VelocityController
 from others.State import to_state
 
 if __name__ == '__main__':
-    episodes_amount = 3
+    episodes_amount = 50
     steps_amount = 500
     env = gym.make('LunarLander-v2')
     vel_conf = VelConf(max_y_velocity=0.4, normal_height=0.4,
@@ -23,19 +25,23 @@ if __name__ == '__main__':
         VelocityController(vel_conf, log),
     ], is_debug=False)
 
+    time_measurements = []
     for i_episode in range(episodes_amount):
-        # noinspection PyRedeclaration
         observation = env.reset()
         log.clear()
         total_reward = 0
+        is_done = False
+        start_time = time.time()
         for t in range(steps_amount):
-            env.render()
             state = to_state(observation)
             log.append(state)
             observation, reward, done, info = env.step(balancer.make_action(state))
             total_reward += reward
 
-            if done:
-                print("Episode finished after {} steps, reward {}".format(t + 1, total_reward))
-                break
+            # if done:
+            #     is_done = True
+            #     break
+        time_measurements.append([t, time.time() - start_time])
+        print("Episode finished after {} steps, reward {}".format(t + 1, total_reward))
     env.close()
+    print(time_measurements)
